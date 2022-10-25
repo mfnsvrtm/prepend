@@ -12,7 +12,7 @@ class PrependArgs {
 
     @CommandLine.Option(names = {"-t", "--targets"}, paramLabel = "<targets-path>",
             description = "Path to target list")
-    Path fileListPath = Path.of("targets.txt");
+    Path targetListPath = Path.of("targets.txt");
 
     @CommandLine.Option(names = {"-c", "--copyright"}, paramLabel = "<copyright-path>",
             description = "Path to copyright notice")

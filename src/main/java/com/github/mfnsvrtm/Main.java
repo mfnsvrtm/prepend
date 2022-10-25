@@ -38,7 +38,7 @@ public class Main implements Callable<Integer> {
     }
 
     private void validate() {
-        if (Files.notExists(args.fileListPath)) {
+        if (Files.notExists(args.targetListPath)) {
             throw new CommandLine.ParameterException(args.spec.commandLine(),
                     "Invalid <targets-path>. File doesn't exist. Make sure 'targets.txt' " +
                             "is present in CWD or provide a valid path with '-t' option.");

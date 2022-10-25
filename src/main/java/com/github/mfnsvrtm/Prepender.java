@@ -22,32 +22,32 @@ class Prepender {
     }
 
     void run() throws PrependException {
-        List<Path> targets;
-        byte[] copyright;
+        List<Path> targetList;
+        byte[] copyrightNotice;
 
         try {
-            targets = Files.lines(args.fileListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
+            targetList = Files.lines(args.targetListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
                     .collect(Collectors.toList());
-            copyright = Files.readAllBytes(args.copyrightNoticePath);
+            copyrightNotice = Files.readAllBytes(args.copyrightNoticePath);
         } catch (IOException e) {
             throw new PrependException("Couldn't read the target list file.");
         } catch (InvalidPathException e) {
             throw new PrependException("Target list file contains invalid paths.");
         }
 
-        copyright = appendEmptyLines(copyright, args.extraLineCount, args.lineEnding);
+        copyrightNotice = appendEmptyLines(copyrightNotice, args.extraLineCount, args.lineEnding);
 
         if (args.rootDirectoryPath != null) {
-            resolveAll(targets, args.rootDirectoryPath);
+            resolveAll(targetList, args.rootDirectoryPath);
         }
 
         // I don't know if this is of any value, but I thought it would be a good idea to exit early
         // and not make any modifications if one of the target paths is invalid
-        validatePaths(targets);
+        assertFilesExist(targetList);
 
         var buffer = new ByteArrayOutputStream();
-        for (Path target : targets) {
-            buffer.writeBytes(copyright);
+        for (Path target : targetList) {
+            buffer.writeBytes(copyrightNotice);
             try {
                 Files.newInputStream(target).transferTo(buffer);
                 Files.write(target, buffer.toByteArray());
@@ -80,7 +80,7 @@ class Prepender {
         }
     }
 
-    private static void validatePaths(List<Path> targets) throws PrependException {
+    private static void assertFilesExist(List<Path> targets) throws PrependException {
         for (Path target : targets) {
             if (!Files.exists(target))
                 throw new PrependException(String.format("'%s' target path is invalid. File does not exist.", target));
