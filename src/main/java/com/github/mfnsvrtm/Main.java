@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(name = "prepend", description = "Append copyright notice to a list of files", sortOptions = false)
+@CommandLine.Command(name = "prepend", description = "Prepend copyright notice to a list of files", sortOptions = false)
 public class Main implements Callable<Integer> {
     private Integer extraLineCount = 0;
 
