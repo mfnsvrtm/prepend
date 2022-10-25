@@ -52,7 +52,8 @@ public class Main implements Callable<Integer> {
     private static int processedCount = 0;
 
     public static void main(String[] args) {
-        CommandLine cl = new CommandLine(new Main()).setExecutionExceptionHandler(new PrependerExceptionHandler());
+        CommandLine cl = new CommandLine(new Main()).setExecutionExceptionHandler(new PrependerExceptionHandler())
+                .setCaseInsensitiveEnumValuesAllowed(true);
         int exitCode = cl.execute(args);
         if (exitCode == CommandLine.ExitCode.SOFTWARE) {
             System.out.printf("%d files processed.%n", processedCount);
