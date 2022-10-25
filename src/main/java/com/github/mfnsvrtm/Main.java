@@ -1,12 +1,15 @@
 package com.github.mfnsvrtm;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
+import com.github.rvesse.airline.SingleCommand;
+import com.github.rvesse.airline.help.Help;
+import com.github.rvesse.airline.help.cli.CliCommandUsageGenerator;
+import com.github.rvesse.airline.parser.errors.ParseException;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,34 +19,29 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            Args parsedArgs = new Args();
-            JCommander jc = JCommander.newBuilder().programName("prepend").addObject(parsedArgs).build();
-            jc.parse(args);
+            SingleCommand<PrependCommand> parser = SingleCommand.singleCommand(PrependCommand.class);
+            PrependCommand cmd = parser.parse(args);
 
-            if (parsedArgs.help) {
-                jc.usage();
-            } else {
-                run(parsedArgs);
+            if (!cmd.help.showHelpIfRequested()) {
+                run(cmd);
                 System.out.printf("Success. %d files processed.%n", processedCount);
             }
         } catch (PrependerException e) {
             System.out.printf("Error. %s%n", e.getMessage());
             System.out.printf("%d files processed.%n", processedCount);
-        } catch (ParameterException e) {
-            // I'm unhappy with error messages that I get out of this. They work for the developer, but not the user.
-            // For instance: "Was passed main parameter '<name>' but no main parameter was defined in your arg class"
+        } catch (ParseException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private static void run(Args args) throws PrependerException {
+    private static void run(PrependCommand cmd) throws PrependerException {
         List<Path> targets;
         byte[] copyright;
 
         try {
-            targets = Files.lines(args.fileListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
+            targets = Files.lines(cmd.fileListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
                     .collect(Collectors.toList());
-            copyright = Files.readAllBytes(args.copyrightNoticePath);
+            copyright = Files.readAllBytes(cmd.copyrightNoticePath);
         } catch (IOException e) {
             throw new PrependerException("Couldn't locate target list or copyright notice. " +
                     "Make sure targets \"targets.txt\" and \"copyright.txt\" are present in the current directory " +
@@ -52,12 +50,12 @@ public class Main {
             throw new PrependerException("Target file contains invalid paths.");
         }
 
-        if (args.extraLineCount != null) {
-            copyright = addEmptyLines(copyright, args.extraLineCount, args.lineEnding);
+        if (cmd.extraLineCount != null) {
+            copyright = addEmptyLines(copyright, cmd.extraLineCount, cmd.lineEnding);
         }
 
-        if (args.rootDirectoryPath != null) {
-            setRoot(targets, args.rootDirectoryPath);
+        if (cmd.rootDirectoryPath != null) {
+            setRoot(targets, cmd.rootDirectoryPath);
         }
 
         // I don't know if this is of any value, but I thought it would be a good idea to exit early
