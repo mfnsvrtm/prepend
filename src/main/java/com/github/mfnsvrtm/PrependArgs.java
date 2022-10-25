@@ -5,7 +5,7 @@ import picocli.CommandLine;
 import java.nio.file.Path;
 
 class PrependArgs {
-    Integer extraLineCount = 0;
+    int extraLineCount = 0;
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -24,7 +24,7 @@ class PrependArgs {
 
     @CommandLine.Option(names = {"-a", "--add-lines"}, paramLabel = "<line-count>",
             description = "Number of empty lines to be appended to the notice")
-    void setExtraLineCount(Integer value) {
+    void setExtraLineCount(int value) {
         if (value < 0) {
             throw new CommandLine.ParameterException(spec.commandLine(),
                     String.format("Invalid value '%s' for option '--add-lines': " +

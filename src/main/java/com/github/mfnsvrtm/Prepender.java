@@ -37,9 +37,7 @@ class Prepender {
             throw new PrependException("Target file contains invalid paths.");
         }
 
-        if (args.extraLineCount != null) {
-            copyright = appendEmptyLines(copyright, args.extraLineCount, args.lineEnding);
-        }
+        copyright = appendEmptyLines(copyright, args.extraLineCount, args.lineEnding);
 
         if (args.rootDirectoryPath != null) {
             resolveAll(targets, args.rootDirectoryPath);
