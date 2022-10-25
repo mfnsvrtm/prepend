@@ -2,12 +2,11 @@ package com.github.mfnsvrtm;
 
 import picocli.CommandLine;
 
-class PrependerExceptionHandler implements CommandLine.IExecutionExceptionHandler {
-
+class PrependExceptionHandler implements CommandLine.IExecutionExceptionHandler {
     @Override
     public int handleExecutionException(Exception ex, CommandLine cmd, CommandLine.ParseResult parseResult) {
         cmd.getErr().println(cmd.getColorScheme().errorText(ex.getMessage()));
-        if (!(ex instanceof PrependerException)) {
+        if (!(ex instanceof PrependException)) {
             ex.printStackTrace();
         }
 

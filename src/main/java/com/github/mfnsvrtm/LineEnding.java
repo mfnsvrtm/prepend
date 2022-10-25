@@ -5,7 +5,7 @@ enum LineEnding {
     MAC,
     NIX;
 
-    String getString() {
+    String stringValue() {
         switch (this) {
             case WIN:
                 return "\r\n";
