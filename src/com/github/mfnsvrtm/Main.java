@@ -42,7 +42,7 @@ public class Main {
         } catch (IOException e) {
             throw new PrependerException("Couldn't locate target list or copyright notice. " +
                     "Make sure targets \"targets.txt\" and \"copyright.txt\" are present in the current directory " +
-                    "or pass one (or both) of -f <target list path> and -c <copyright path> flags.");
+                    "or pass one (or both) of -t <target list path> and -c <copyright path> flags.");
         } catch (InvalidPathException e) {
             throw new PrependerException("Target file contains invalid paths.");
         }
