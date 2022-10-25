@@ -6,11 +6,11 @@ Java version 11 or higher is required.
 
 ## Arguments
 The following arguments are supported:
-1. `-t <path>`: sets the `target list` path (*default is "targets.txt"*).
-2. `-c <path>`: sets the `copyright` path (*default is "copyright.txt"*).
-3. `-r <path>`: sets the `root` path.
-4. `--add <integer>`: sets the number of extra lines added after the copyright notice.
-5. `--ending <"win"/"mac"/"nix">`: sets the line ending to be used for these extra lines (`\r\n`/`\r`/`\n`).
+1. `-t (--targets) <path>`: sets the `target list` path (*default is "targets.txt"*).
+2. `-c (--copyright) <path>`: sets the `copyright` path (*default is "copyright.txt"*).
+3. `-r (--root-dir), -b (--base-dir) <path>`: sets the `root` path.
+4. `-a (--add-lines) <integer>`: sets the number of extra lines added after the copyright notice.
+5. `-e (--line-ending) <"win"/"mac"/"nix">`: sets the line ending to be used for these extra lines (`\r\n`/`\r`/`\n`).
 
 The `target list` file contains a list of target file paths (one per line; empty lines are allowed). The copyright notice (found at the `copyright` path) will be prepended to each target.
 
