@@ -30,9 +30,9 @@ class Prepender {
                     .collect(Collectors.toList());
             copyright = Files.readAllBytes(args.copyrightNoticePath);
         } catch (IOException e) {
-            throw new PrependException("Couldn't read the targets file.");
+            throw new PrependException("Couldn't read the target list file.");
         } catch (InvalidPathException e) {
-            throw new PrependException("Target file contains invalid paths.");
+            throw new PrependException("Target list file contains invalid paths.");
         }
 
         copyright = appendEmptyLines(copyright, args.extraLineCount, args.lineEnding);
@@ -52,7 +52,7 @@ class Prepender {
                 Files.newInputStream(target).transferTo(buffer);
                 Files.write(target, buffer.toByteArray());
             } catch (IOException e) {
-                throw new PrependException(String.format("Couldn't override %s. " +
+                throw new PrependException(String.format("Couldn't overwrite target `%s`. " +
                         "Make sure no other process is using the file.", target));
             }
             processedTargetCount++;
@@ -83,7 +83,7 @@ class Prepender {
     private static void validatePaths(List<Path> targets) throws PrependException {
         for (Path target : targets) {
             if (!Files.exists(target))
-                throw new PrependException(String.format("%s path is invalid. File does not exist.", target));
+                throw new PrependException(String.format("'%s' target path is invalid. File does not exist.", target));
         }
     }
 }
