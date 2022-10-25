@@ -30,9 +30,7 @@ class Prepender {
                     .collect(Collectors.toList());
             copyright = Files.readAllBytes(args.copyrightNoticePath);
         } catch (IOException e) {
-            throw new PrependException("Couldn't locate target list or copyright notice. " +
-                    "Make sure targets \"targets.txt\" and \"copyright.txt\" are present in the current directory " +
-                    "or pass one (or both) of -t <target list path> and -c <copyright path> flags.");
+            throw new PrependException("Couldn't read the targets file.");
         } catch (InvalidPathException e) {
             throw new PrependException("Target file contains invalid paths.");
         }
@@ -54,7 +52,7 @@ class Prepender {
                 Files.newInputStream(target).transferTo(buffer);
                 Files.write(target, buffer.toByteArray());
             } catch (IOException e) {
-                throw new PrependException(String.format("Encountered and IO exception while processing %s. " +
+                throw new PrependException(String.format("Couldn't override %s. " +
                         "Make sure no other process is using the file.", target));
             }
             processedTargetCount++;
