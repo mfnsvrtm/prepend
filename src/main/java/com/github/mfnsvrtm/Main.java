@@ -1,49 +1,76 @@
 package com.github.mfnsvrtm;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
+import picocli.CommandLine;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Main {
+@CommandLine.Command(name = "prepend", description = "Append copyright notice to a list of files", sortOptions = false)
+public class Main implements Callable<Integer> {
+    private Integer extraLineCount = 0;
+
+    @CommandLine.Spec
+    CommandLine.Model.CommandSpec spec;
+
+    @CommandLine.Option(names = {"-t", "--targets"}, paramLabel = "<targets-path>",
+            description = "Path to target list")
+    Path fileListPath = Path.of("targets.txt");
+
+    @CommandLine.Option(names = {"-c", "--copyright"}, paramLabel = "<copyright-path>",
+            description = "Path to copyright notice")
+    Path copyrightNoticePath = Path.of("copyright.txt");
+
+    @CommandLine.Option(names = {"-b", "-r", "--root-dir", "--base-dir"}, paramLabel = "<root-path>",
+            description = "Root directory for relative targets")
+    Path rootDirectoryPath = null;
+
+    @CommandLine.Option(names = {"-a", "--add-lines"}, paramLabel = "<line-count>",
+            description = "Number of empty lines to be appended to the notice")
+    void setExtraLineCount(Integer value) {
+        if (value < 0) {
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                    String.format("Invalid value '%s' for option '--add-lines': " +
+                            "only non-negative integers are allowed", value));
+        }
+        extraLineCount = value;
+    }
+
+    @CommandLine.Option(names = {"-e", "--line-ending"}, paramLabel = "<line-ending>",
+            description = "Line ending of the empty lines created by --add-lines. One of ${COMPLETION-CANDIDATES}")
+    LineEnding lineEnding = LineEnding.NIX;
+
+    @CommandLine.Option(names = {"-h", "--help"}, usageHelp = true,
+            description = "Display this help message")
+    boolean usageHelpRequested;
+
     private static int processedCount = 0;
 
     public static void main(String[] args) {
-        try {
-            Args parsedArgs = new Args();
-            JCommander jc = JCommander.newBuilder().programName("prepend").addObject(parsedArgs).build();
-            jc.parse(args);
-
-            if (parsedArgs.help) {
-                jc.usage();
-            } else {
-                run(parsedArgs);
-                System.out.printf("Success. %d files processed.%n", processedCount);
-            }
-        } catch (PrependerException e) {
-            System.out.printf("Error. %s%n", e.getMessage());
+        CommandLine cl = new CommandLine(new Main()).setExecutionExceptionHandler(new PrependerExceptionHandler());
+        int exitCode = cl.execute(args);
+        if (exitCode == CommandLine.ExitCode.SOFTWARE) {
             System.out.printf("%d files processed.%n", processedCount);
-        } catch (ParameterException e) {
-            // I'm unhappy with error messages that I get out of this. They work for the developer, but not the user.
-            // For instance: "Was passed main parameter '<name>' but no main parameter was defined in your arg class"
-            System.out.println(e.getMessage());
+        } else if (exitCode == CommandLine.ExitCode.OK && !cl.isUsageHelpRequested()) {
+            System.out.printf("Success. %d files processed.%n", processedCount);
         }
+        System.exit(exitCode);
     }
 
-    private static void run(Args args) throws PrependerException {
+    @Override
+    public Integer call() throws PrependerException {
         List<Path> targets;
         byte[] copyright;
 
         try {
-            targets = Files.lines(args.fileListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
+            targets = Files.lines(fileListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
                     .collect(Collectors.toList());
-            copyright = Files.readAllBytes(args.copyrightNoticePath);
+            copyright = Files.readAllBytes(copyrightNoticePath);
         } catch (IOException e) {
             throw new PrependerException("Couldn't locate target list or copyright notice. " +
                     "Make sure targets \"targets.txt\" and \"copyright.txt\" are present in the current directory " +
@@ -52,12 +79,12 @@ public class Main {
             throw new PrependerException("Target file contains invalid paths.");
         }
 
-        if (args.extraLineCount != null) {
-            copyright = addEmptyLines(copyright, args.extraLineCount, args.lineEnding);
+        if (extraLineCount != null) {
+            copyright = addEmptyLines(copyright, extraLineCount, lineEnding);
         }
 
-        if (args.rootDirectoryPath != null) {
-            setRoot(targets, args.rootDirectoryPath);
+        if (rootDirectoryPath != null) {
+            setRoot(targets, rootDirectoryPath);
         }
 
         // I don't know if this is of any value, but I thought it would be a good idea to exit early
@@ -77,6 +104,8 @@ public class Main {
             processedCount++;
             buffer.reset();
         }
+
+        return CommandLine.ExitCode.OK;
     }
 
     private static void setRoot(List<Path> pathList, Path root) {
@@ -99,7 +128,7 @@ public class Main {
         }
     }
 
-    private static void checkPaths(List<Path> targets) throws PrependerException {
+    private static void checkPaths(List<Path> targets) throws PrependerException  {
         for (Path target : targets) {
             if (!Files.exists(target))
                 throw new PrependerException(String.format("%s path is invalid. File does not exist.", target));
