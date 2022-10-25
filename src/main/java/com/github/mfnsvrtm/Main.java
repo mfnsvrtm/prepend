@@ -19,9 +19,15 @@ public class Main {
     public static void main(String[] args) {
         try {
             Args parsedArgs = new Args();
-            JCommander.newBuilder().addObject(parsedArgs).build().parse(args);
-            run(parsedArgs);
-            System.out.printf("Success. %d files processed.%n", processedCount);
+            JCommander jc = JCommander.newBuilder().programName("prepend").addObject(parsedArgs).build();
+            jc.parse(args);
+
+            if (parsedArgs.help) {
+                jc.usage();
+            } else {
+                run(parsedArgs);
+                System.out.printf("Success. %d files processed.%n", processedCount);
+            }
         } catch (PrependerException e) {
             System.out.printf("Error. %s%n", e.getMessage());
             System.out.printf("%d files processed.%n", processedCount);
@@ -127,6 +133,6 @@ class Args {
     LineEnding lineEnding = LineEnding.NIX;
 
     @Parameter(names = {"-h", "--help"}, help = true)
-    private boolean help;
+    boolean help;
 }
 
