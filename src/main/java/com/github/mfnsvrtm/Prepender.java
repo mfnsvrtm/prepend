@@ -1,7 +1,5 @@
 package com.github.mfnsvrtm;
 
-import picocli.CommandLine;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,16 +38,16 @@ class Prepender {
         }
 
         if (args.extraLineCount != null) {
-            copyright = addEmptyLines(copyright, args.extraLineCount, args.lineEnding);
+            copyright = appendEmptyLines(copyright, args.extraLineCount, args.lineEnding);
         }
 
         if (args.rootDirectoryPath != null) {
-            setRoot(targets, args.rootDirectoryPath);
+            resolveAll(targets, args.rootDirectoryPath);
         }
 
         // I don't know if this is of any value, but I thought it would be a good idea to exit early
         // and not make any modifications if one of the target paths is invalid
-        checkPaths(targets);
+        validatePaths(targets);
 
         var buffer = new ByteArrayOutputStream();
         for (Path target : targets) {
@@ -66,15 +64,15 @@ class Prepender {
         }
     }
 
-    private static void setRoot(List<Path> pathList, Path root) {
-        var iterator = pathList.listIterator();
+    private static void resolveAll(List<Path> paths, Path root) {
+        var iterator = paths.listIterator();
         while (iterator.hasNext()) {
             var target = iterator.next();
             iterator.set(root.toAbsolutePath().resolve(target));
         }
     }
 
-    private static byte[] addEmptyLines(byte[] buffer, int count, LineEnding lineEnding) throws PrependException {
+    private static byte[] appendEmptyLines(byte[] buffer, int count, LineEnding lineEnding) throws PrependException {
         String ending = lineEnding.stringValue();
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -86,7 +84,7 @@ class Prepender {
         }
     }
 
-    private static void checkPaths(List<Path> targets) throws PrependException {
+    private static void validatePaths(List<Path> targets) throws PrependException {
         for (Path target : targets) {
             if (!Files.exists(target))
                 throw new PrependException(String.format("%s path is invalid. File does not exist.", target));
