@@ -28,7 +28,7 @@ LICENCE ↵
 ↵
 .
 ```
-Alternatively, you can use the `--add` / `--ending` arguments.
+Alternatively, you can use the `--add-lines` / `--line-ending` arguments.
 
 ## Encoding
 
