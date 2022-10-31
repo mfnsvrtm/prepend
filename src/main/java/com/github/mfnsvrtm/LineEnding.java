@@ -1,19 +1,17 @@
 package com.github.mfnsvrtm;
 
 enum LineEnding {
-    WIN,
-    MAC,
-    NIX;
+    WIN("\r\n"),
+    MAC("\r"),
+    NIX("\n");
+
+    private final String value;
+
+    LineEnding(String value) {
+        this.value = value;
+    }
 
     String stringValue() {
-        switch (this) {
-            case WIN:
-                return "\r\n";
-            case MAC:
-                return "\r";
-            case NIX:
-                return "\n";
-        }
-        throw new RuntimeException("Unexpected LineEnding enum variant.");
+        return value;
     }
 }
