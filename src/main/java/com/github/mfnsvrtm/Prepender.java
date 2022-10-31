@@ -25,19 +25,19 @@ class Prepender {
         List<Path> targetList;
         byte[] copyrightNotice;
 
-        try (var lines = Files.lines(args.targetListPath)) {
+        try (var lines = Files.lines(args.getTargetListPath())) {
             targetList = lines.filter(Predicate.not(String::isBlank)).map(Path::of).collect(Collectors.toList());
-            copyrightNotice = Files.readAllBytes(args.copyrightNoticePath);
+            copyrightNotice = Files.readAllBytes(args.getCopyrightNoticePath());
         } catch (IOException e) {
             throw new PrependException("Couldn't read the target list file.");
         } catch (InvalidPathException e) {
             throw new PrependException("Target list file contains invalid paths.");
         }
 
-        copyrightNotice = appendEmptyLines(copyrightNotice, args.extraLineCount, args.lineEnding);
+        copyrightNotice = appendEmptyLines(copyrightNotice, args.getExtraLineCount(), args.getLineEnding());
 
-        if (args.rootDirectoryPath != null) {
-            resolveAll(targetList, args.rootDirectoryPath);
+        if (args.getRootDirectoryPath() != null) {
+            resolveAll(targetList, args.getRootDirectoryPath());
         }
 
         // I don't know if this is of any value, but I thought it would be a good idea to exit early

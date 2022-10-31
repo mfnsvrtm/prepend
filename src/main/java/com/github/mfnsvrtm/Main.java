@@ -10,7 +10,7 @@ public class Main implements Callable<Integer> {
     private static Prepender prepender;
 
     @CommandLine.Mixin
-    private PrependArgs args;
+    private CliArgs args;
 
     public static void main(String[] args) {
         CommandLine cl = new CommandLine(new Main())
@@ -31,7 +31,7 @@ public class Main implements Callable<Integer> {
     public Integer call() {
         validate();
 
-        prepender = new Prepender(args);
+        prepender = new Prepender(args.makePojo());
         prepender.run();
 
         return CommandLine.ExitCode.OK;
