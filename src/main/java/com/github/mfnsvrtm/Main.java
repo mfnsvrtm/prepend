@@ -28,7 +28,7 @@ public class Main implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() throws PrependException {
+    public Integer call() {
         validate();
 
         prepender = new Prepender(args);

@@ -21,7 +21,7 @@ class Prepender {
         return processedTargetCount;
     }
 
-    void run() throws PrependException {
+    void run() {
         List<Path> targetList;
         byte[] copyrightNotice;
 
@@ -68,7 +68,7 @@ class Prepender {
         }
     }
 
-    private static byte[] appendEmptyLines(byte[] buffer, int count, LineEnding lineEnding) throws PrependException {
+    private static byte[] appendEmptyLines(byte[] buffer, int count, LineEnding lineEnding) {
         String ending = lineEnding.stringValue();
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -80,7 +80,7 @@ class Prepender {
         }
     }
 
-    private static void assertFilesExist(List<Path> targets) throws PrependException {
+    private static void assertFilesExist(List<Path> targets) {
         for (Path target : targets) {
             if (!Files.exists(target))
                 throw new PrependException(String.format("'%s' target path is invalid. File does not exist.", target));
