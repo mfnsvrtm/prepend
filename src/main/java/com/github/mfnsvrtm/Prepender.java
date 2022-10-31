@@ -25,9 +25,8 @@ class Prepender {
         List<Path> targetList;
         byte[] copyrightNotice;
 
-        try {
-            targetList = Files.lines(args.targetListPath).filter(Predicate.not(String::isBlank)).map(Path::of)
-                    .collect(Collectors.toList());
+        try (var lines = Files.lines(args.targetListPath)) {
+            targetList = lines.filter(Predicate.not(String::isBlank)).map(Path::of).collect(Collectors.toList());
             copyrightNotice = Files.readAllBytes(args.copyrightNoticePath);
         } catch (IOException e) {
             throw new PrependException("Couldn't read the target list file.");
@@ -48,8 +47,8 @@ class Prepender {
         var buffer = new ByteArrayOutputStream();
         for (Path target : targetList) {
             buffer.writeBytes(copyrightNotice);
-            try {
-                Files.newInputStream(target).transferTo(buffer);
+            try (var targetStream = Files.newInputStream(target)) {
+                targetStream.transferTo(buffer);
                 Files.write(target, buffer.toByteArray());
             } catch (IOException e) {
                 throw new PrependException(String.format("Couldn't overwrite target `%s`. " +
