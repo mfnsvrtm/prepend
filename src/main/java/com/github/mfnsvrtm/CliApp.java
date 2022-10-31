@@ -6,22 +6,24 @@ import java.nio.file.Files;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "prepend", description = "Prepend copyright notice to a list of files", sortOptions = false)
-public class Main implements Callable<Integer> {
-    private static Prepender prepender;
-
+public class CliApp implements Callable<Integer> {
     @CommandLine.Mixin
     private CliArgs args;
 
+    private int processedTargetCount = 0;
+
     public static void main(String[] args) {
-        CommandLine cl = new CommandLine(new Main())
+        var app = new CliApp();
+
+        CommandLine cl = new CommandLine(app)
                 .setExecutionExceptionHandler(new PrependExceptionHandler())
                 .setCaseInsensitiveEnumValuesAllowed(true);
 
         int exitCode = cl.execute(args);
         if (exitCode == CommandLine.ExitCode.SOFTWARE) {
-            System.out.printf("%d files processed.%n", prepender.getProcessedTargetCount());
+            System.out.printf("%d files processed.%n", app.processedTargetCount);
         } else if (exitCode == CommandLine.ExitCode.OK && !cl.isUsageHelpRequested()) {
-            System.out.printf("Success. %d files processed.%n", prepender.getProcessedTargetCount());
+            System.out.printf("Success. %d files processed.%n", app.processedTargetCount);
         }
 
         System.exit(exitCode);
@@ -31,8 +33,9 @@ public class Main implements Callable<Integer> {
     public Integer call() {
         validate();
 
-        prepender = new Prepender(args.makePojo());
+        var prepender = new Prepender(args.makePojo());
         prepender.run();
+        processedTargetCount = prepender.getProcessedTargetCount();
 
         return CommandLine.ExitCode.OK;
     }
